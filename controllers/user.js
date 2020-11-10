@@ -19,11 +19,12 @@ var controller = {
         var info = request.body;
         info.email = info.email.toLowerCase();
         info.role = undefined; // Role must be modified by an admin
-
+        info._id = undefined; 
+        info.avatar = undefined; 
         //Validate data
-        var nameVal = !validator.isEmpty(info.name),
-            surnameVal = !validator.isEmpty(info.surname),
-            emailVal = !validator.isEmpty(info.email) && validator.isEmail(info.email),
+        var nameVal = !validator.isEmpty(info.name.trim()),
+            surnameVal = !validator.isEmpty(info.surname.trim()),
+            emailVal = !validator.isEmpty(info.email.trim()) && validator.isEmail(info.email),
             passwordVal = !validator.isEmpty(info.password);
         if(nameVal && surnameVal && emailVal && passwordVal){
             // Create objet
@@ -39,7 +40,6 @@ var controller = {
                     // Password encryption
                     bcrypt.hash(info.password,10,(err,hash)=>{
                         user.password = hash;
-                        console.log(user.password);
                         // Save user
                         user.save((err, userSaved)=>{
                             if(err || !userSaved){
@@ -154,7 +154,7 @@ var controller = {
             info.email = info.email.toLowerCase();
             //verify if the mail is already taken
             
-                User.findOne({email: info.email}, (err, userExists) =>{
+                User.findOne({email: info.email},(err, userExists) =>{
                     if(err){
                         return res.status(500).send({
                             status: 'Error',
@@ -176,10 +176,10 @@ var controller = {
                                 return res.status(200).send({
                                     status: 'Success',
                                     message: "User was updated",
-                                    userU: userUpdated
+                                    user: userUpdated
                                 });
                             }
-                        });
+                        }).select({password:0});
                     }
                 });
         }else{
